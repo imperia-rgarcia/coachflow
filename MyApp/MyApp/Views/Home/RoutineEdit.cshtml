@@ -1,0 +1,96 @@
+@model MyApp.Models.RoutineEditViewModel
+@using System.Linq
+
+@{
+    ViewData["Title"] = "Editar rutina";
+}
+
+<div class="px-4 sm:px-6 lg:px-8">
+    <div class="sm:flex sm:items-center">
+        <div class="sm:flex-auto">
+            <h1 class="text-base font-semibold text-white">Editar rutina</h1>
+            <p class="mt-2 text-sm text-gray-300">
+                Ajusta los detalles de la rutina y registra la información de cada día del microciclo.
+            </p>
+        </div>
+        <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
+            <a asp-area="" asp-controller="Home" asp-action="RoutineList"
+               class="block rounded-md bg-gray-700 px-3 py-2 text-center text-sm font-semibold text-white shadow-xs hover:bg-gray-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500">
+                Volver al listado
+            </a>
+        </div>
+    </div>
+
+    <div class="mt-8 space-y-8">
+        <section class="rounded-lg border border-white/10 bg-white/5 shadow-sm">
+            <div class="border-b border-white/10 px-6 py-4">
+                <h2 class="text-lg font-semibold text-white">@Model.Name</h2>
+                <p class="mt-1 text-sm text-gray-300">Rutina #@Model.RoutineId</p>
+            </div>
+            <div class="px-6 py-4">
+                <h3 class="text-sm font-semibold uppercase tracking-wide text-gray-300">Fases</h3>
+                @if (Model.Phases.Any())
+                {
+                    <ul class="mt-3 space-y-2">
+                        @foreach (MyApp.Models.RoutinePhaseInputModel phase in Model.Phases)
+                        {
+                            <li class="rounded-md border border-white/5 bg-white/5 px-3 py-2 text-sm text-gray-200">
+                                <span class="font-medium text-white">@phase.Name</span>
+                                <span class="ml-2 text-gray-300">@phase.Microcycles microciclos</span>
+                            </li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <p class="mt-3 text-sm text-gray-400">Esta rutina no tiene fases registradas.</p>
+                }
+            </div>
+        </section>
+
+        <section class="space-y-6">
+            <h2 class="text-lg font-semibold text-white">Días del microciclo</h2>
+            @if (Model.Days.Any())
+            {
+                @for (int i = 0; i < Model.Days.Count; i++)
+                {
+                    MyApp.Models.RoutineDayEditInputModel day = Model.Days[i];
+                    <div class="rounded-lg border border-white/10 bg-white/5 shadow-sm">
+                        <div class="border-b border-white/10 px-6 py-4">
+                            <h3 class="text-base font-semibold text-white">@(!string.IsNullOrWhiteSpace(day.DayName) ? day.DayName : string.Format("Día {0}", i + 1))</h3>
+                        </div>
+                        <div class="px-6 py-6">
+                            <input type="hidden" asp-for="Days[i].DayName" />
+                            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                                <div class="sm:col-span-2">
+                                    <label asp-for="Days[i].Exercise" class="block text-sm font-medium text-gray-200">Ejercicio</label>
+                                    <input asp-for="Days[i].Exercise" class="mt-1 block w-full rounded-md border border-white/10 bg-gray-900 px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="Nombre del ejercicio" />
+                                </div>
+                                <div class="sm:col-span-2">
+                                    <label asp-for="Days[i].Comment" class="block text-sm font-medium text-gray-200">Comentario</label>
+                                    <textarea asp-for="Days[i].Comment" rows="3" class="mt-1 block w-full rounded-md border border-white/10 bg-gray-900 px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="Notas o indicaciones adicionales"></textarea>
+                                </div>
+                                <div>
+                                    <label asp-for="Days[i].Series" class="block text-sm font-medium text-gray-200">Series</label>
+                                    <input asp-for="Days[i].Series" class="mt-1 block w-full rounded-md border border-white/10 bg-gray-900 px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="0" />
+                                </div>
+                                <div>
+                                    <label asp-for="Days[i].Repetitions" class="block text-sm font-medium text-gray-200">Repeticiones</label>
+                                    <input asp-for="Days[i].Repetitions" class="mt-1 block w-full rounded-md border border-white/10 bg-gray-900 px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="0" />
+                                </div>
+                                <div>
+                                    <label asp-for="Days[i].Rir" class="block text-sm font-medium text-gray-200">RIR</label>
+                                    <input asp-for="Days[i].Rir" class="mt-1 block w-full rounded-md border border-white/10 bg-gray-900 px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="0" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <p class="text-sm text-gray-400">La rutina no tiene días de microciclo registrados.</p>
+            }
+        </section>
+    </div>
+</div>

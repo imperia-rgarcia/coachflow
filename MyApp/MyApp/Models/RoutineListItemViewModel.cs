@@ -4,6 +4,8 @@ namespace MyApp.Models
 {
     public class RoutineListItemViewModel
     {
+        public int RoutineId { get; set; }
+
         public string Name { get; set; } = string.Empty;
 
         public string PhasesSummary { get; set; } = string.Empty;

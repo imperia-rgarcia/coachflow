@@ -118,6 +118,7 @@ namespace MyApp.Controllers
 
                 RoutineListItemViewModel listItem = new RoutineListItemViewModel
                 {
+                    RoutineId = routine.RoutineId,
                     Name = routine.Name,
                     PhasesSummary = phasesSummary,
                     MicrocycleDaysSummary = microcycleDaysSummary,
@@ -127,6 +128,43 @@ namespace MyApp.Controllers
                 };
 
                 viewModel.Add(listItem);
+            }
+
+            return View(viewModel);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> RoutineEdit(int id)
+        {
+            Routine? routine = await _dbContext.Routines
+                .FirstOrDefaultAsync(routineItem => routineItem.RoutineId == id);
+
+            if (routine == null)
+            {
+                return NotFound();
+            }
+
+            List<RoutinePhaseInputModel>? phases = JsonSerializer.Deserialize<List<RoutinePhaseInputModel>>(routine.PhasesJson);
+            List<RoutinePhaseInputModel> phaseList = phases ?? new List<RoutinePhaseInputModel>();
+
+            List<string>? microcycleDays = JsonSerializer.Deserialize<List<string>>(routine.MicrocycleDaysJson);
+            List<string> microcycleDaysList = microcycleDays ?? new List<string>();
+
+            RoutineEditViewModel viewModel = new RoutineEditViewModel
+            {
+                RoutineId = routine.RoutineId,
+                Name = routine.Name,
+                Phases = phaseList
+            };
+
+            foreach (string day in microcycleDaysList)
+            {
+                RoutineDayEditInputModel dayModel = new RoutineDayEditInputModel
+                {
+                    DayName = day
+                };
+
+                viewModel.Days.Add(dayModel);
             }
 
             return View(viewModel);
