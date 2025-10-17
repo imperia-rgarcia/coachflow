@@ -21,7 +21,17 @@
         </div>
     </div>
 
-    <div class="mt-8 space-y-8">
+    @if (TempData["RoutineUpdated"] != null)
+    {
+        <div class="mt-6 rounded-md border border-green-500/60 bg-green-500/10 px-4 py-3 text-sm text-green-200">
+            @TempData["RoutineUpdated"]
+        </div>
+    }
+
+    <form asp-action="RoutineEdit" method="post" class="mt-8 space-y-8">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="RoutineId" />
+
         <section class="rounded-lg border border-white/10 bg-white/5 shadow-sm">
             <div class="border-b border-white/10 px-6 py-4">
                 <h2 class="text-lg font-semibold text-white">@Model.Name</h2>
@@ -49,40 +59,82 @@
         </section>
 
         <section class="space-y-6">
-            <h2 class="text-lg font-semibold text-white">Días del microciclo</h2>
+            <div class="flex items-center justify-between">
+                <h2 class="text-lg font-semibold text-white">Días del microciclo</h2>
+                <span class="text-sm text-gray-400">Agrega toda la información necesaria para cada día.</span>
+            </div>
+
             @if (Model.Days.Any())
             {
                 @for (int i = 0; i < Model.Days.Count; i++)
                 {
                     MyApp.Models.RoutineDayEditInputModel day = Model.Days[i];
-                    <div class="rounded-lg border border-white/10 bg-white/5 shadow-sm">
+                    <div class="rounded-lg border border-white/10 bg-white/5 shadow-sm" data-day-index="@i">
                         <div class="border-b border-white/10 px-6 py-4">
                             <h3 class="text-base font-semibold text-white">@(!string.IsNullOrWhiteSpace(day.DayName) ? day.DayName : string.Format("Día {0}", i + 1))</h3>
                         </div>
-                        <div class="px-6 py-6">
+                        <div class="px-6 py-6 space-y-6">
                             <input type="hidden" asp-for="Days[i].DayName" />
-                            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                                <div class="sm:col-span-2">
-                                    <label asp-for="Days[i].Exercise" class="block text-sm font-medium text-gray-200">Ejercicio</label>
-                                    <input asp-for="Days[i].Exercise" class="mt-1 block w-full rounded-md border border-white/10 bg-gray-900 px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="Nombre del ejercicio" />
-                                </div>
-                                <div class="sm:col-span-2">
-                                    <label asp-for="Days[i].Comment" class="block text-sm font-medium text-gray-200">Comentario</label>
-                                    <textarea asp-for="Days[i].Comment" rows="3" class="mt-1 block w-full rounded-md border border-white/10 bg-gray-900 px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="Notas o indicaciones adicionales"></textarea>
-                                </div>
-                                <div>
-                                    <label asp-for="Days[i].Series" class="block text-sm font-medium text-gray-200">Series</label>
-                                    <input asp-for="Days[i].Series" class="mt-1 block w-full rounded-md border border-white/10 bg-gray-900 px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="0" />
-                                </div>
-                                <div>
-                                    <label asp-for="Days[i].Repetitions" class="block text-sm font-medium text-gray-200">Repeticiones</label>
-                                    <input asp-for="Days[i].Repetitions" class="mt-1 block w-full rounded-md border border-white/10 bg-gray-900 px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="0" />
-                                </div>
-                                <div>
-                                    <label asp-for="Days[i].Rir" class="block text-sm font-medium text-gray-200">RIR</label>
-                                    <input asp-for="Days[i].Rir" class="mt-1 block w-full rounded-md border border-white/10 bg-gray-900 px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="0" />
-                                </div>
+                            <div class="space-y-4" data-exercise-list>
+                                @for (int j = 0; j < day.Exercises.Count; j++)
+                                {
+                                    <div class="rounded-md border border-white/10 bg-white/5 p-4" data-exercise-item>
+                                        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                                            <div class="sm:col-span-2">
+                                                <label asp-for="Days[i].Exercises[j].Exercise" class="block text-sm font-medium text-gray-200">Ejercicio</label>
+                                                <input asp-for="Days[i].Exercises[j].Exercise" class="mt-1 block w-full rounded-md border border-white/10 bg-gray-900 px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="Nombre del ejercicio" />
+                                            </div>
+                                            <div class="sm:col-span-2">
+                                                <label asp-for="Days[i].Exercises[j].Comment" class="block text-sm font-medium text-gray-200">Comentario</label>
+                                                <textarea asp-for="Days[i].Exercises[j].Comment" rows="3" class="mt-1 block w-full rounded-md border border-white/10 bg-gray-900 px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="Notas o indicaciones adicionales"></textarea>
+                                            </div>
+                                            <div>
+                                                <label asp-for="Days[i].Exercises[j].Series" class="block text-sm font-medium text-gray-200">Series</label>
+                                                <input asp-for="Days[i].Exercises[j].Series" class="mt-1 block w-full rounded-md border border-white/10 bg-gray-900 px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="0" />
+                                            </div>
+                                            <div>
+                                                <label asp-for="Days[i].Exercises[j].Repetitions" class="block text-sm font-medium text-gray-200">Repeticiones</label>
+                                                <input asp-for="Days[i].Exercises[j].Repetitions" class="mt-1 block w-full rounded-md border border-white/10 bg-gray-900 px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="0" />
+                                            </div>
+                                            <div>
+                                                <label asp-for="Days[i].Exercises[j].Rir" class="block text-sm font-medium text-gray-200">RIR</label>
+                                                <input asp-for="Days[i].Exercises[j].Rir" class="mt-1 block w-full rounded-md border border-white/10 bg-gray-900 px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="0" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
                             </div>
+                            <div class="flex justify-end">
+                                <button type="button" class="rounded-md border border-dashed border-white/30 px-3 py-2 text-sm font-semibold text-white hover:border-white/60" data-add-exercise>
+                                    Añadir otro ejercicio
+                                </button>
+                            </div>
+                            <template data-exercise-template>
+                                <div class="rounded-md border border-white/10 bg-white/5 p-4" data-exercise-item>
+                                    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                                        <div class="sm:col-span-2">
+                                            <label class="block text-sm font-medium text-gray-200" for="Days___DAY_INDEX____Exercises___EXERCISE_INDEX____Exercise">Ejercicio</label>
+                                            <input class="mt-1 block w-full rounded-md border border-white/10 bg-gray-900 px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="Nombre del ejercicio" name="Days[__DAY_INDEX__].Exercises[__EXERCISE_INDEX__].Exercise" id="Days___DAY_INDEX____Exercises___EXERCISE_INDEX____Exercise" />
+                                        </div>
+                                        <div class="sm:col-span-2">
+                                            <label class="block text-sm font-medium text-gray-200" for="Days___DAY_INDEX____Exercises___EXERCISE_INDEX____Comment">Comentario</label>
+                                            <textarea rows="3" class="mt-1 block w-full rounded-md border border-white/10 bg-gray-900 px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="Notas o indicaciones adicionales" name="Days[__DAY_INDEX__].Exercises[__EXERCISE_INDEX__].Comment" id="Days___DAY_INDEX____Exercises___EXERCISE_INDEX____Comment"></textarea>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-200" for="Days___DAY_INDEX____Exercises___EXERCISE_INDEX____Series">Series</label>
+                                            <input class="mt-1 block w-full rounded-md border border-white/10 bg-gray-900 px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="0" name="Days[__DAY_INDEX__].Exercises[__EXERCISE_INDEX__].Series" id="Days___DAY_INDEX____Exercises___EXERCISE_INDEX____Series" />
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-200" for="Days___DAY_INDEX____Exercises___EXERCISE_INDEX____Repetitions">Repeticiones</label>
+                                            <input class="mt-1 block w-full rounded-md border border-white/10 bg-gray-900 px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="0" name="Days[__DAY_INDEX__].Exercises[__EXERCISE_INDEX__].Repetitions" id="Days___DAY_INDEX____Exercises___EXERCISE_INDEX____Repetitions" />
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-200" for="Days___DAY_INDEX____Exercises___EXERCISE_INDEX____Rir">RIR</label>
+                                            <input class="mt-1 block w-full rounded-md border border-white/10 bg-gray-900 px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="0" name="Days[__DAY_INDEX__].Exercises[__EXERCISE_INDEX__].Rir" id="Days___DAY_INDEX____Exercises___EXERCISE_INDEX____Rir" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
                         </div>
                     </div>
                 }
@@ -92,5 +144,53 @@
                 <p class="text-sm text-gray-400">La rutina no tiene días de microciclo registrados.</p>
             }
         </section>
-    </div>
+
+        <div class="flex justify-end">
+            <button type="submit" class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-400">
+                Guardar cambios
+            </button>
+        </div>
+    </form>
 </div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const daySections = document.querySelectorAll('[data-day-index]');
+
+            daySections.forEach(function (daySection) {
+                const addButton = daySection.querySelector('[data-add-exercise]');
+
+                if (!addButton) {
+                    return;
+                }
+
+                addButton.addEventListener('click', function (event) {
+                    event.preventDefault();
+
+                    const dayIndexValue = daySection.getAttribute('data-day-index');
+                    const exerciseList = daySection.querySelector('[data-exercise-list]');
+                    const templateElement = daySection.querySelector('template[data-exercise-template]');
+
+                    if (!dayIndexValue || !exerciseList || !templateElement) {
+                        return;
+                    }
+
+                    const exerciseIndex = exerciseList.children.length;
+                    const templateContent = templateElement.innerHTML
+                        .replace(/__DAY_INDEX__/g, dayIndexValue)
+                        .replace(/__EXERCISE_INDEX__/g, exerciseIndex.toString());
+
+                    const container = document.createElement('div');
+                    container.innerHTML = templateContent.trim();
+                    const newExercise = container.firstElementChild;
+
+                    if (newExercise) {
+                        exerciseList.appendChild(newExercise);
+                    }
+                });
+            });
+        });
+    </script>
+}

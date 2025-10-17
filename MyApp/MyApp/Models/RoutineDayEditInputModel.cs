@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace MyApp.Models
@@ -7,29 +8,21 @@ namespace MyApp.Models
         public RoutineDayEditInputModel()
         {
             DayName = string.Empty;
-            Exercise = string.Empty;
-            Comment = string.Empty;
-            Series = string.Empty;
-            Repetitions = string.Empty;
-            Rir = string.Empty;
+            Exercises = new List<RoutineDayExerciseInputModel>();
         }
 
         [Display(Name = "Día del microciclo")]
         public string DayName { get; set; }
 
-        [Display(Name = "Ejercicio")]
-        public string Exercise { get; set; }
+        public List<RoutineDayExerciseInputModel> Exercises { get; set; }
 
-        [Display(Name = "Comentario")]
-        public string Comment { get; set; }
-
-        [Display(Name = "Series")]
-        public string Series { get; set; }
-
-        [Display(Name = "Repeticiones")]
-        public string Repetitions { get; set; }
-
-        [Display(Name = "RIR")]
-        public string Rir { get; set; }
+        public void EnsureExerciseEntry()
+        {
+            if (Exercises.Count == 0)
+            {
+                RoutineDayExerciseInputModel exercise = new RoutineDayExerciseInputModel();
+                Exercises.Add(exercise);
+            }
+        }
     }
 }

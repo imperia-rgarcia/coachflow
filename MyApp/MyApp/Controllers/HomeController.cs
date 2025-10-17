@@ -55,7 +55,8 @@ namespace MyApp.Controllers
             }
 
             string phasesJson = JsonSerializer.Serialize(inputModel.Phases);
-            string microcycleDaysJson = JsonSerializer.Serialize(inputModel.MicrocycleDays);
+            List<RoutineDayEditInputModel> dayDetails = BuildMicrocycleDayDetailsFromNames(inputModel.MicrocycleDays);
+            string microcycleDaysJson = JsonSerializer.Serialize(dayDetails);
             int totalMicrocycles = inputModel.GetTotalMicrocycles();
 
             Routine routine = new Routine
@@ -90,9 +91,16 @@ namespace MyApp.Controllers
                 List<RoutinePhaseInputModel>? phases = JsonSerializer.Deserialize<List<RoutinePhaseInputModel>>(routine.PhasesJson);
                 List<RoutinePhaseInputModel> phaseList = phases ?? defaultPhaseList;
 
-                List<string> defaultMicrocycleDaysList = new List<string>();
-                List<string>? microcycleDays = JsonSerializer.Deserialize<List<string>>(routine.MicrocycleDaysJson);
-                List<string> microcycleDaysList = microcycleDays ?? defaultMicrocycleDaysList;
+                List<RoutineDayEditInputModel> microcycleDayDetails = DeserializeMicrocycleDayDetails(routine.MicrocycleDaysJson);
+                List<string> microcycleDaysList = new List<string>();
+
+                foreach (RoutineDayEditInputModel dayDetail in microcycleDayDetails)
+                {
+                    if (!string.IsNullOrWhiteSpace(dayDetail.DayName))
+                    {
+                        microcycleDaysList.Add(dayDetail.DayName);
+                    }
+                }
 
                 List<string> phaseSummaries = new List<string>();
 
@@ -147,27 +155,65 @@ namespace MyApp.Controllers
             List<RoutinePhaseInputModel>? phases = JsonSerializer.Deserialize<List<RoutinePhaseInputModel>>(routine.PhasesJson);
             List<RoutinePhaseInputModel> phaseList = phases ?? new List<RoutinePhaseInputModel>();
 
-            List<string>? microcycleDays = JsonSerializer.Deserialize<List<string>>(routine.MicrocycleDaysJson);
-            List<string> microcycleDaysList = microcycleDays ?? new List<string>();
+            List<RoutineDayEditInputModel> microcycleDayDetails = DeserializeMicrocycleDayDetails(routine.MicrocycleDaysJson);
 
             RoutineEditViewModel viewModel = new RoutineEditViewModel
             {
                 RoutineId = routine.RoutineId,
                 Name = routine.Name,
-                Phases = phaseList
+                Phases = phaseList,
+                Days = microcycleDayDetails
             };
 
-            foreach (string day in microcycleDaysList)
+            foreach (RoutineDayEditInputModel day in viewModel.Days)
             {
-                RoutineDayEditInputModel dayModel = new RoutineDayEditInputModel
-                {
-                    DayName = day
-                };
-
-                viewModel.Days.Add(dayModel);
+                day.EnsureExerciseEntry();
             }
 
             return View(viewModel);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RoutineEdit(RoutineEditViewModel inputModel)
+        {
+            Routine? routine = await _dbContext.Routines
+                .FirstOrDefaultAsync(routineItem => routineItem.RoutineId == inputModel.RoutineId);
+
+            if (routine == null)
+            {
+                return NotFound();
+            }
+
+            List<RoutinePhaseInputModel>? phases = JsonSerializer.Deserialize<List<RoutinePhaseInputModel>>(routine.PhasesJson);
+            inputModel.Phases = phases ?? new List<RoutinePhaseInputModel>();
+            inputModel.Name = routine.Name;
+
+            if (inputModel.Days == null)
+            {
+                inputModel.Days = new List<RoutineDayEditInputModel>();
+            }
+
+            if (!ModelState.IsValid)
+            {
+                foreach (RoutineDayEditInputModel day in inputModel.Days)
+                {
+                    day.EnsureExerciseEntry();
+                }
+
+                return View(inputModel);
+            }
+
+            List<RoutineDayEditInputModel> sanitizedDays = SanitizeRoutineDayEntries(inputModel.Days);
+            string microcycleDaysJson = JsonSerializer.Serialize(sanitizedDays);
+
+            routine.MicrocycleDaysJson = microcycleDaysJson;
+
+            await _dbContext.SaveChangesAsync();
+
+            TempData["RoutineUpdated"] = "Rutina actualizada correctamente.";
+
+            return RedirectToAction(nameof(RoutineEdit), new { id = routine.RoutineId });
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
@@ -187,6 +233,115 @@ namespace MyApp.Controllers
             {
                 model.MicrocycleDays.Add(string.Empty);
             }
+        }
+
+        private static List<RoutineDayEditInputModel> BuildMicrocycleDayDetailsFromNames(List<string> dayNames)
+        {
+            List<RoutineDayEditInputModel> dayDetails = new List<RoutineDayEditInputModel>();
+
+            foreach (string dayName in dayNames)
+            {
+                RoutineDayEditInputModel dayDetail = new RoutineDayEditInputModel
+                {
+                    DayName = dayName
+                };
+
+                dayDetail.EnsureExerciseEntry();
+                dayDetails.Add(dayDetail);
+            }
+
+            return dayDetails;
+        }
+
+        private static List<RoutineDayEditInputModel> DeserializeMicrocycleDayDetails(string microcycleDaysJson)
+        {
+            List<RoutineDayEditInputModel> dayDetails = new List<RoutineDayEditInputModel>();
+
+            if (string.IsNullOrWhiteSpace(microcycleDaysJson))
+            {
+                return dayDetails;
+            }
+
+            try
+            {
+                List<RoutineDayEditInputModel>? detailedDays = JsonSerializer.Deserialize<List<RoutineDayEditInputModel>>(microcycleDaysJson);
+
+                if (detailedDays != null)
+                {
+                    foreach (RoutineDayEditInputModel detailedDay in detailedDays)
+                    {
+                        detailedDay.EnsureExerciseEntry();
+                        dayDetails.Add(detailedDay);
+                    }
+
+                    return dayDetails;
+                }
+            }
+            catch (JsonException)
+            {
+            }
+
+            try
+            {
+                List<string>? dayNames = JsonSerializer.Deserialize<List<string>>(microcycleDaysJson);
+
+                if (dayNames != null)
+                {
+                    dayDetails = BuildMicrocycleDayDetailsFromNames(dayNames);
+                    return dayDetails;
+                }
+            }
+            catch (JsonException)
+            {
+            }
+
+            return dayDetails;
+        }
+
+        private static List<RoutineDayEditInputModel> SanitizeRoutineDayEntries(List<RoutineDayEditInputModel> days)
+        {
+            List<RoutineDayEditInputModel> sanitizedDays = new List<RoutineDayEditInputModel>();
+
+            foreach (RoutineDayEditInputModel day in days)
+            {
+                RoutineDayEditInputModel sanitizedDay = new RoutineDayEditInputModel
+                {
+                    DayName = day.DayName
+                };
+
+                if (day.Exercises == null)
+                {
+                    day.Exercises = new List<RoutineDayExerciseInputModel>();
+                }
+
+                foreach (RoutineDayExerciseInputModel exercise in day.Exercises)
+                {
+                    bool hasContent = !string.IsNullOrWhiteSpace(exercise.Exercise)
+                        || !string.IsNullOrWhiteSpace(exercise.Comment)
+                        || !string.IsNullOrWhiteSpace(exercise.Series)
+                        || !string.IsNullOrWhiteSpace(exercise.Repetitions)
+                        || !string.IsNullOrWhiteSpace(exercise.Rir);
+
+                    if (hasContent)
+                    {
+                        RoutineDayExerciseInputModel sanitizedExercise = new RoutineDayExerciseInputModel
+                        {
+                            Exercise = exercise.Exercise,
+                            Comment = exercise.Comment,
+                            Series = exercise.Series,
+                            Repetitions = exercise.Repetitions,
+                            Rir = exercise.Rir
+                        };
+
+                        sanitizedDay.Exercises.Add(sanitizedExercise);
+                    }
+                }
+
+                sanitizedDay.EnsureExerciseEntry();
+                sanitizedDays.Add(sanitizedDay);
+            }
+
+            return sanitizedDays;
         }
     }
 }
