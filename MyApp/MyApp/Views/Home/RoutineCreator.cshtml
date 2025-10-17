@@ -1,0 +1,160 @@
+@{
+    ViewData["Title"] = "Routine Creator";
+}
+
+<section class="space-y-10">
+    <header class="space-y-4">
+        <p class="text-sm uppercase tracking-[0.2em] text-indigo-300">CoachFlow Tools</p>
+        <h1 class="text-4xl font-semibold text-white">Diseña tu rutina ideal</h1>
+        <p class="max-w-3xl text-base text-gray-300">Organiza hábitos diarios y sesiones de entrenamiento en un solo lugar. Completa el asistente y genera un plan equilibrado que combine objetivos, disponibilidad y niveles de energía.</p>
+    </header>
+
+    <div class="grid gap-8 lg:grid-cols-[2fr,1fr]">
+        <form class="space-y-8 rounded-2xl border border-white/10 bg-gray-900/40 p-8 shadow-xl shadow-indigo-500/5">
+            <div class="grid gap-6 md:grid-cols-2">
+                <label class="flex flex-col gap-2">
+                    <span class="text-sm font-medium text-indigo-200">Nombre de la rutina</span>
+                    <input type="text" placeholder="Fuerza y movilidad" class="rounded-lg border border-white/10 bg-gray-950/60 px-3 py-2 text-sm text-white placeholder:text-gray-500 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/40" />
+                </label>
+                <label class="flex flex-col gap-2">
+                    <span class="text-sm font-medium text-indigo-200">Objetivo principal</span>
+                    <select class="rounded-lg border border-white/10 bg-gray-950/60 px-3 py-2 text-sm text-white focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/40">
+                        <option>Mejorar resistencia</option>
+                        <option>Ganar fuerza</option>
+                        <option>Aumentar flexibilidad</option>
+                        <option>Recuperación activa</option>
+                    </select>
+                </label>
+                <label class="flex flex-col gap-2 md:col-span-2">
+                    <span class="text-sm font-medium text-indigo-200">Descripción</span>
+                    <textarea rows="3" placeholder="Incluye el enfoque, recursos disponibles y cualquier consideración específica" class="rounded-lg border border-white/10 bg-gray-950/60 px-3 py-2 text-sm text-white placeholder:text-gray-500 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/40"></textarea>
+                </label>
+            </div>
+
+            <div class="grid gap-6 md:grid-cols-3">
+                <label class="flex flex-col gap-2">
+                    <span class="text-sm font-medium text-indigo-200">Duración por sesión</span>
+                    <input type="number" min="10" max="180" placeholder="60 minutos" class="rounded-lg border border-white/10 bg-gray-950/60 px-3 py-2 text-sm text-white placeholder:text-gray-500 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/40" />
+                </label>
+                <label class="flex flex-col gap-2">
+                    <span class="text-sm font-medium text-indigo-200">Frecuencia semanal</span>
+                    <input type="number" min="1" max="7" placeholder="4 sesiones" class="rounded-lg border border-white/10 bg-gray-950/60 px-3 py-2 text-sm text-white placeholder:text-gray-500 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/40" />
+                </label>
+                <label class="flex flex-col gap-2">
+                    <span class="text-sm font-medium text-indigo-200">Nivel de energía esperado</span>
+                    <select class="rounded-lg border border-white/10 bg-gray-950/60 px-3 py-2 text-sm text-white focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/40">
+                        <option>Suave</option>
+                        <option>Moderado</option>
+                        <option>Intenso</option>
+                    </select>
+                </label>
+            </div>
+
+            <fieldset class="space-y-4">
+                <legend class="text-sm font-medium text-indigo-200">Días preferidos</legend>
+                <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                    
+                    <label class="flex items-center gap-3 rounded-lg border border-white/10 bg-gray-950/60 px-4 py-3 text-sm text-gray-200 transition hover:border-indigo-400/60">
+                        <input type="checkbox" class="size-4 rounded border-white/10 bg-gray-900 text-indigo-400 focus:ring-indigo-400/60" />
+                        <span>Lunes</span>
+                    </label>
+                    <label class="flex items-center gap-3 rounded-lg border border-white/10 bg-gray-950/60 px-4 py-3 text-sm text-gray-200 transition hover:border-indigo-400/60">
+                        <input type="checkbox" class="size-4 rounded border-white/10 bg-gray-900 text-indigo-400 focus:ring-indigo-400/60" />
+                        <span>Martes</span>
+                    </label>
+                    <label class="flex items-center gap-3 rounded-lg border border-white/10 bg-gray-950/60 px-4 py-3 text-sm text-gray-200 transition hover:border-indigo-400/60">
+                        <input type="checkbox" class="size-4 rounded border-white/10 bg-gray-900 text-indigo-400 focus:ring-indigo-400/60" />
+                        <span>Miércoles</span>
+                    </label>
+                    <label class="flex items-center gap-3 rounded-lg border border-white/10 bg-gray-950/60 px-4 py-3 text-sm text-gray-200 transition hover:border-indigo-400/60">
+                        <input type="checkbox" class="size-4 rounded border-white/10 bg-gray-900 text-indigo-400 focus:ring-indigo-400/60" />
+                        <span>Jueves</span>
+                    </label>
+                    <label class="flex items-center gap-3 rounded-lg border border-white/10 bg-gray-950/60 px-4 py-3 text-sm text-gray-200 transition hover:border-indigo-400/60">
+                        <input type="checkbox" class="size-4 rounded border-white/10 bg-gray-900 text-indigo-400 focus:ring-indigo-400/60" />
+                        <span>Viernes</span>
+                    </label>
+                    <label class="flex items-center gap-3 rounded-lg border border-white/10 bg-gray-950/60 px-4 py-3 text-sm text-gray-200 transition hover:border-indigo-400/60">
+                        <input type="checkbox" class="size-4 rounded border-white/10 bg-gray-900 text-indigo-400 focus:ring-indigo-400/60" />
+                        <span>Sábado</span>
+                    </label>
+                    <label class="flex items-center gap-3 rounded-lg border border-white/10 bg-gray-950/60 px-4 py-3 text-sm text-gray-200 transition hover:border-indigo-400/60">
+                        <input type="checkbox" class="size-4 rounded border-white/10 bg-gray-900 text-indigo-400 focus:ring-indigo-400/60" />
+                        <span>Domingo</span>
+                    </label>
+                </div>
+            </fieldset>
+
+            <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-lg font-semibold text-white">Bloques de la sesión</h2>
+                    <button type="button" class="inline-flex items-center gap-2 rounded-lg border border-indigo-400/60 px-3 py-1.5 text-sm font-medium text-indigo-200 transition hover:border-indigo-300 hover:text-indigo-100">
+                        <span class="inline-flex size-5 items-center justify-center rounded-full bg-indigo-500/30 text-indigo-200">+</span>Agregar bloque
+                    </button>
+                </div>
+                <div class="space-y-3">
+                    <article class="flex flex-col gap-3 rounded-xl border border-white/10 bg-gray-950/60 p-4 md:flex-row md:items-center md:justify-between">
+                        <div>
+                            <h3 class="text-base font-semibold text-white">Calentamiento dinámico</h3>
+                            <p class="text-sm text-gray-400">Movilidad articular y activación neuromuscular.</p>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <span class="rounded-full bg-indigo-500/10 px-3 py-1 text-sm text-indigo-200">10 min</span>
+                            <button type="button" class="text-sm text-gray-400 hover:text-indigo-200">Editar</button>
+                        </div>
+                    </article>
+                    <article class="flex flex-col gap-3 rounded-xl border border-white/10 bg-gray-950/60 p-4 md:flex-row md:items-center md:justify-between">
+                        <div>
+                            <h3 class="text-base font-semibold text-white">Bloque principal</h3>
+                            <p class="text-sm text-gray-400">Circuito de fuerza alternado con ejercicios de estabilidad.</p>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <span class="rounded-full bg-indigo-500/10 px-3 py-1 text-sm text-indigo-200">35 min</span>
+                            <button type="button" class="text-sm text-gray-400 hover:text-indigo-200">Editar</button>
+                        </div>
+                    </article>
+                    <article class="flex flex-col gap-3 rounded-xl border border-white/10 bg-gray-950/60 p-4 md:flex-row md:items-center md:justify-between">
+                        <div>
+                            <h3 class="text-base font-semibold text-white">Vuelta a la calma</h3>
+                            <p class="text-sm text-gray-400">Respiración guiada y estiramientos específicos.</p>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <span class="rounded-full bg-indigo-500/10 px-3 py-1 text-sm text-indigo-200">15 min</span>
+                            <button type="button" class="text-sm text-gray-400 hover:text-indigo-200">Editar</button>
+                        </div>
+                    </article>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-4 border-t border-white/10 pt-6 md:flex-row md:items-center md:justify-between">
+                <p class="text-sm text-gray-400">Puedes ajustar los bloques cuando tengas nuevas métricas o feedback de tus deportistas.</p>
+                <div class="flex gap-3">
+                    <button type="button" class="rounded-lg border border-white/10 px-4 py-2 text-sm font-medium text-gray-300 hover:border-gray-400/40 hover:text-white">Guardar borrador</button>
+                    <button type="submit" class="rounded-lg bg-indigo-500 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-500/30 transition hover:bg-indigo-400">Generar rutina</button>
+                </div>
+            </div>
+        </form>
+
+        <aside class="space-y-6 rounded-2xl border border-indigo-500/30 bg-indigo-500/10 p-6">
+            <h2 class="text-lg font-semibold text-indigo-100">Plantilla sugerida</h2>
+            <ul class="space-y-4 text-sm text-indigo-100/80">
+                <li class="flex items-start gap-3">
+                    <span class="mt-1 inline-flex size-5 items-center justify-center rounded-full bg-indigo-500/40 text-xs font-semibold text-white">1</span>
+                    <p>Selecciona los días con mayor energía para ubicar el bloque principal.</p>
+                </li>
+                <li class="flex items-start gap-3">
+                    <span class="mt-1 inline-flex size-5 items-center justify-center rounded-full bg-indigo-500/40 text-xs font-semibold text-white">2</span>
+                    <p>Alterna la intensidad entre sesiones para optimizar la recuperación muscular.</p>
+                </li>
+                <li class="flex items-start gap-3">
+                    <span class="mt-1 inline-flex size-5 items-center justify-center rounded-full bg-indigo-500/40 text-xs font-semibold text-white">3</span>
+                    <p>Reserva al menos un bloque de movilidad o respiración consciente cada semana.</p>
+                </li>
+            </ul>
+            <div class="rounded-xl bg-indigo-500/20 p-4 text-sm text-indigo-100/90">
+                <p class="font-semibold text-indigo-100">Tip de progresión</p>
+                <p>Usa un ciclo de 4 semanas y aumenta el volumen del bloque principal en un 5&nbsp;% solo si el deportista reporta RPE menor a 7.</p>
+            </div>
+        </aside>
+    </div>
+</section>
