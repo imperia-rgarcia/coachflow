@@ -5,36 +5,35 @@ namespace MyApp.Models
 {
     public class RoutineInputModel
     {
-        [Required(ErrorMessage = "El nombre es obligatorio.")]
-        [MaxLength(100, ErrorMessage = "El nombre no puede exceder 100 caracteres.")]
+        public RoutineInputModel()
+        {
+            Phases = new List<RoutinePhaseInputModel>();
+            MicrocycleDays = new List<string>();
+        }
+
+        [Required(ErrorMessage = "El nombre de la rutina es obligatorio.")]
+        [MaxLength(100, ErrorMessage = "El nombre de la rutina no puede exceder 100 caracteres.")]
         [Display(Name = "Nombre de la rutina")]
         public string Name { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "El objetivo es obligatorio.")]
-        [MaxLength(100, ErrorMessage = "El objetivo no puede exceder 100 caracteres.")]
-        [Display(Name = "Objetivo principal")]
-        public string PrimaryObjective { get; set; } = string.Empty;
+        [MinLength(1, ErrorMessage = "Debes agregar al menos una fase.")]
+        [Display(Name = "Fases de la rutina")]
+        public List<RoutinePhaseInputModel> Phases { get; set; }
 
-        [MaxLength(500, ErrorMessage = "La descripción no puede exceder 500 caracteres.")]
-        [Display(Name = "Descripción")]
-        public string? Description { get; set; }
+        [MinLength(1, ErrorMessage = "Debes indicar al menos un día para el microciclo.")]
+        [Display(Name = "Días del microciclo")]
+        public List<string> MicrocycleDays { get; set; }
 
-        [Range(10, 180, ErrorMessage = "La duración debe estar entre 10 y 180 minutos.")]
-        [Display(Name = "Duración por sesión")]
-        public int SessionDurationMinutes { get; set; }
+        public int GetTotalMicrocycles()
+        {
+            int totalMicrocycles = 0;
 
-        [Range(1, 7, ErrorMessage = "La frecuencia debe estar entre 1 y 7 sesiones.")]
-        [Display(Name = "Frecuencia semanal")]
-        public int WeeklyFrequency { get; set; }
+            foreach (RoutinePhaseInputModel phase in Phases)
+            {
+                totalMicrocycles += phase.Microcycles;
+            }
 
-        [Required(ErrorMessage = "Selecciona el nivel de energía.")]
-        [MaxLength(50)]
-        [Display(Name = "Nivel de energía esperado")]
-        public string EnergyLevel { get; set; } = string.Empty;
-
-        [Display(Name = "Días preferidos")]
-        public List<string> PreferredDays { get; set; } = new List<string>();
-
-        public bool IsDraft { get; set; }
+            return totalMicrocycles;
+        }
     }
 }

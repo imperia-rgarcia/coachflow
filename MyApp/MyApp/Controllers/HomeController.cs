@@ -1,8 +1,9 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using MyApp.Data;
 using MyApp.Models;
 
@@ -34,37 +35,39 @@ namespace MyApp.Controllers
         {
             RoutineInputModel viewModel = new RoutineInputModel();
 
+            EnsureMinimumEntries(viewModel);
+
             return View(viewModel);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> RoutineCreator(RoutineInputModel inputModel, string? saveAction)
+        public async Task<IActionResult> RoutineCreator(RoutineInputModel inputModel)
         {
+            EnsureMinimumEntries(inputModel);
+
             if (!ModelState.IsValid)
             {
                 return View(inputModel);
             }
 
-            List<string> selectedDays = inputModel.PreferredDays ?? new List<string>();
+            string phasesJson = JsonSerializer.Serialize(inputModel.Phases);
+            string microcycleDaysJson = JsonSerializer.Serialize(inputModel.MicrocycleDays);
+            int totalMicrocycles = inputModel.GetTotalMicrocycles();
 
             Routine routine = new Routine
             {
                 Name = inputModel.Name,
-                PrimaryObjective = inputModel.PrimaryObjective,
-                Description = inputModel.Description,
-                SessionDurationMinutes = inputModel.SessionDurationMinutes,
-                WeeklyFrequency = inputModel.WeeklyFrequency,
-                EnergyLevel = inputModel.EnergyLevel,
-                PreferredDays = string.Join(",", selectedDays),
-                IsDraft = string.Equals(saveAction, "Draft", StringComparison.OrdinalIgnoreCase),
+                PhasesJson = phasesJson,
+                MicrocycleDaysJson = microcycleDaysJson,
+                TotalMicrocycles = totalMicrocycles,
                 CreatedAtUtc = DateTime.UtcNow
             };
 
             _dbContext.Routines.Add(routine);
             await _dbContext.SaveChangesAsync();
 
-            TempData["RoutineSaved"] = routine.IsDraft ? "Rutina guardada como borrador." : "Rutina generada y guardada.";
+            TempData["RoutineSaved"] = "Rutina guardada correctamente.";
 
             return RedirectToAction(nameof(RoutineCreator));
         }
@@ -73,6 +76,19 @@ namespace MyApp.Controllers
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+
+        private static void EnsureMinimumEntries(RoutineInputModel model)
+        {
+            if (model.Phases.Count == 0)
+            {
+                model.Phases.Add(new RoutinePhaseInputModel());
+            }
+
+            if (model.MicrocycleDays.Count == 0)
+            {
+                model.MicrocycleDays.Add(string.Empty);
+            }
         }
     }
 }
