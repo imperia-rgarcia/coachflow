@@ -2,6 +2,20 @@
 # This .gitignore file was automatically created by Microsoft(R) Visual Studio.
 ################################################################################
 
+# Visual Studio cache
 /.vs
 /MyApp/.vs/MyApp
+
+# Build artifacts
 /MyApp/MyApp/obj
+/MyApp/MyApp/bin/
+bin/
+obj/
+Debug/
+Release/
+
+# Configuration and settings
+config/
+settings/
+*.config
+*.settings
