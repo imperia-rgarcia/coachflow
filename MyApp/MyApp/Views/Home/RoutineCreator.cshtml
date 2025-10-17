@@ -1,79 +1,223 @@
+@model MyApp.Models.RoutineInputModel
+
 @{
     ViewData["Title"] = "Routine Creator";
+    System.Collections.Generic.List<string> availableDays = new System.Collections.Generic.List<string> { "Lunes", "Martes",
+"Miércoles", "Jueves", "Viernes", "Sábado", "Domingo" };
+    string? successMessage = TempData["RoutineSaved"] as string;
 }
 
 <section class="space-y-10">
     <header class="space-y-2">
         <p class="text-sm uppercase tracking-[0.2em] text-indigo-300">Constructor de rutinas</p>
         <h1 class="text-4xl font-semibold text-white">Define la estructura de tu rutina</h1>
-        <p class="text-base text-gray-300">Completa la información básica, especifica las fases con sus microciclos y define los días que compondrán cada microciclo.</p>
+        <p class="text-base text-gray-300">Completa la información básica, especifica las fases con sus microciclos y
+            define los días que compondrán cada microciclo.</p>
     </header>
 
-    <form class="space-y-10 rounded-2xl border border-white/10 bg-gray-900/40 p-8 shadow-xl shadow-indigo-500/10">
-        <section class="space-y-4">
-            <h2 class="text-lg font-semibold text-white">Información general</h2>
-            <label class="flex flex-col gap-2">
-                <span class="text-sm font-medium text-indigo-200">Nombre de la rutina</span>
-                <input type="text" name="routineName" placeholder="Rutina de fuerza para Carlos" class="rounded-lg border border-white/10 bg-gray-950/60 px-3 py-2 text-sm text-white placeholder:text-gray-500 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/40" />
-            </label>
-        </section>
+    @if (!string.IsNullOrWhiteSpace(successMessage))
+    {
+        <div class="rounded-xl border border-emerald-500/40 bg-emerald-500/10 p-4 text-sm text-emerald-100">
+            @successMessage
+        </div>
+    }
 
-        <section class="space-y-4">
-            <div class="flex items-center justify-between">
-                <h2 class="text-lg font-semibold text-white">Fases de la rutina</h2>
-                <button id="add-phase" type="button" class="inline-flex items-center gap-2 rounded-lg border border-indigo-400/60 px-3 py-1.5 text-sm font-medium text-indigo-200 transition hover:border-indigo-300 hover:text-indigo-100">
-                    <span class="inline-flex size-5 items-center justify-center rounded-full bg-indigo-500/30 text-indigo-200">+</span>
-                    Añadir fase
-                </button>
+    <div class="grid gap-8 lg:grid-cols-[2fr,1fr]">
+        <form asp-action="RoutineCreator" method="post"
+            class="space-y-8 rounded-2xl border border-white/10 bg-gray-900/40 p-8 shadow-xl shadow-indigo-500/5">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly"
+                class="rounded-lg border border-rose-400/40 bg-rose-500/10 p-4 text-sm text-rose-100"></div>
+
+            <div class="grid gap-6 md:grid-cols-2">
+                <label class="flex flex-col gap-2">
+                    <span class="text-sm font-medium text-indigo-200">Nombre de la rutina</span>
+                    <input asp-for="Name" placeholder="Fuerza y movilidad"
+                        class="rounded-lg border border-white/10 bg-gray-950/60 px-3 py-2 text-sm text-white placeholder:text-gray-500 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/40" />
+                    <span asp-validation-for="Name" class="text-xs text-rose-300"></span>
+                </label>
+                <label class="flex flex-col gap-2">
+                    <span class="text-sm font-medium text-indigo-200">Objetivo principal</span>
+                    <select asp-for="PrimaryObjective"
+                        class="rounded-lg border border-white/10 bg-gray-950/60 px-3 py-2 text-sm text-white focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/40">
+                        <option value="">Selecciona una opción</option>
+                        <option value="Mejorar resistencia">Mejorar resistencia</option>
+                        <option value="Ganar fuerza">Ganar fuerza</option>
+                        <option value="Aumentar flexibilidad">Aumentar flexibilidad</option>
+                        <option value="Recuperación activa">Recuperación activa</option>
+                    </select>
+                    <span asp-validation-for="PrimaryObjective" class="text-xs text-rose-300"></span>
+                </label>
+                <label class="flex flex-col gap-2 md:col-span-2">
+                    <span class="text-sm font-medium text-indigo-200">Descripción</span>
+                    <textarea asp-for="Description" rows="3"
+                        placeholder="Incluye el enfoque, recursos disponibles y cualquier consideración específica"
+                        class="rounded-lg border border-white/10 bg-gray-950/60 px-3 py-2 text-sm text-white placeholder:text-gray-500 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/40"></textarea>
+                    <span asp-validation-for="Description" class="text-xs text-rose-300"></span>
+                </label>
             </div>
-            <p class="text-sm text-gray-400">Especifica el nombre de cada fase y el número de microciclos que tendrá.</p>
+            <p class="text-sm text-gray-400">Especifica el nombre de cada fase y el número de microciclos que tendrá.
+            </p>
             <div id="phase-list" class="space-y-4">
                 <div class="grid gap-3 md:grid-cols-[2fr,1fr] md:items-end">
                     <label class="flex flex-col gap-2">
                         <span class="text-sm font-medium text-indigo-200">Nombre de la fase</span>
-                        <input type="text" name="phaseName[]" placeholder="Fase de adaptación" class="rounded-lg border border-white/10 bg-gray-950/60 px-3 py-2 text-sm text-white placeholder:text-gray-500 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/40" />
+                        <input type="text" name="phaseName[]" placeholder="Fase de adaptación"
+                            class="rounded-lg border border-white/10 bg-gray-950/60 px-3 py-2 text-sm text-white placeholder:text-gray-500 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/40" />
                     </label>
                     <label class="flex flex-col gap-2">
                         <span class="text-sm font-medium text-indigo-200">Microciclos</span>
-                        <input type="number" name="phaseMicrocycles[]" min="1" placeholder="2" class="rounded-lg border border-white/10 bg-gray-950/60 px-3 py-2 text-sm text-white placeholder:text-gray-500 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/40" />
+                        <input type="number" name="phaseMicrocycles[]" min="1" placeholder="2"
+                            class="rounded-lg border border-white/10 bg-gray-950/60 px-3 py-2 text-sm text-white placeholder:text-gray-500 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/40" />
                     </label>
                 </div>
             </div>
-        </section>
+        </form>
+    </div>
+</section>
 
-        <section class="space-y-4">
-            <div class="flex items-center justify-between">
-                <h2 class="text-lg font-semibold text-white">Días del microciclo</h2>
-                <button id="add-day" type="button" class="inline-flex items-center gap-2 rounded-lg border border-indigo-400/60 px-3 py-1.5 text-sm font-medium text-indigo-200 transition hover:border-indigo-300 hover:text-indigo-100">
-                    <span class="inline-flex size-5 items-center justify-center rounded-full bg-indigo-500/30 text-indigo-200">+</span>
-                    Añadir día
-                </button>
-            </div>
-            <p class="text-sm text-gray-400">Estos nombres se aplicarán a cada microciclo de la rutina.</p>
-            <div id="day-list" class="space-y-3">
-                <label class="flex flex-col gap-2">
-                    <span class="text-sm font-medium text-indigo-200">Día 1</span>
-                    <input type="text" name="microcycleDay[]" placeholder="Día 1 - Pecho" class="rounded-lg border border-white/10 bg-gray-950/60 px-3 py-2 text-sm text-white placeholder:text-gray-500 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/40" />
-                </label>
-                <label class="flex flex-col gap-2">
-                    <span class="text-sm font-medium text-indigo-200">Día 2</span>
-                    <input type="text" name="microcycleDay[]" placeholder="Día 2 - Pierna" class="rounded-lg border border-white/10 bg-gray-950/60 px-3 py-2 text-sm text-white placeholder:text-gray-500 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/40" />
-                </label>
-                <label class="flex flex-col gap-2">
-                    <span class="text-sm font-medium text-indigo-200">Día 3</span>
-                    <input type="text" name="microcycleDay[]" placeholder="Día 3 - Descanso" class="rounded-lg border border-white/10 bg-gray-950/60 px-3 py-2 text-sm text-white placeholder:text-gray-500 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/40" />
-                </label>
-                <label class="flex flex-col gap-2">
-                    <span class="text-sm font-medium text-indigo-200">Día 4</span>
-                    <input type="text" name="microcycleDay[]" placeholder="Día 4 - Torso" class="rounded-lg border border-white/10 bg-gray-950/60 px-3 py-2 text-sm text-white placeholder:text-gray-500 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/40" />
-                </label>
-            </div>
-        </section>
+<section class="space-y-4">
+    <div class="flex items-center justify-between">
+        <h2 class="text-lg font-semibold text-white">Días del microciclo</h2>
+        <button id="add-day" type="button"
+            class="inline-flex items-center gap-2 rounded-lg border border-indigo-400/60 px-3 py-1.5 text-sm font-medium text-indigo-200 transition hover:border-indigo-300 hover:text-indigo-100">
+            <span
+                class="inline-flex size-5 items-center justify-center rounded-full bg-indigo-500/30 text-indigo-200">+</span>
+            Añadir día
+        </button>
+    </div>
+    <p class="text-sm text-gray-400">Estos nombres se aplicarán a cada microciclo de la rutina.</p>
+    <div id="day-list" class="space-y-3">
+        <label class="flex flex-col gap-2">
+            <span class="text-sm font-medium text-indigo-200">Duración por sesión</span>
+            <input asp-for="SessionDurationMinutes" type="number" min="10" max="180" placeholder="60 minutos"
+                class="rounded-lg border border-white/10 bg-gray-950/60 px-3 py-2 text-sm text-white placeholder:text-gray-500 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/40" />
+            <span asp-validation-for="SessionDurationMinutes" class="text-xs text-rose-300"></span>
+        </label>
+        <label class="flex flex-col gap-2">
+            <span class="text-sm font-medium text-indigo-200">Frecuencia semanal</span>
+            <input asp-for="WeeklyFrequency" type="number" min="1" max="7" placeholder="4 sesiones"
+                class="rounded-lg border border-white/10 bg-gray-950/60 px-3 py-2 text-sm text-white placeholder:text-gray-500 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/40" />
+            <span asp-validation-for="WeeklyFrequency" class="text-xs text-rose-300"></span>
+        </label>
+        <label class="flex flex-col gap-2">
+            <span class="text-sm font-medium text-indigo-200">Nivel de energía esperado</span>
+            <select asp-for="EnergyLevel"
+                class="rounded-lg border border-white/10 bg-gray-950/60 px-3 py-2 text-sm text-white focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/40">
+                <option value="">Selecciona una opción</option>
+                <option value="Suave">Suave</option>
+                <option value="Moderado">Moderado</option>
+                <option value="Intenso">Intenso</option>
+            </select>
+            <span asp-validation-for="EnergyLevel" class="text-xs text-rose-300"></span>
+        </label>
+    </div>
+</section>
 
-        <div class="flex justify-end">
-            <button type="submit" class="rounded-lg bg-indigo-500 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-500/30 transition hover:bg-indigo-400">Guardar estructura</button>
-        </div>
-    </form>
+<fieldset class="space-y-4">
+    <legend class="text-sm font-medium text-indigo-200">Días preferidos</legend>
+    <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        @foreach (string day in availableDays)
+        {
+            bool isChecked = Model.PreferredDays.Contains(day);
+            <label
+                class="flex items-center gap-3 rounded-lg border border-white/10 bg-gray-950/60 px-4 py-3 text-sm text-gray-200 transition hover:border-indigo-400/60">
+                <input name="PreferredDays" type="checkbox" value="@day"
+                    class="size-4 rounded border-white/10 bg-gray-900 text-indigo-400 focus:ring-indigo-400/60" @(isChecked
+                                                                                                                                ? "checked" : string.Empty) />
+                <span>@day</span>
+            </label>
+        }
+    </div>
+    <span asp-validation-for="PreferredDays" class="text-xs text-rose-300"></span>
+</fieldset>
+
+<div class="space-y-4">
+    <div class="flex items-center justify-between">
+        <h2 class="text-lg font-semibold text-white">Bloques de la sesión</h2>
+        <button type="button"
+            class="inline-flex items-center gap-2 rounded-lg border border-indigo-400/60 px-3 py-1.5 text-sm font-medium text-indigo-200 transition hover:border-indigo-300 hover:text-indigo-100">
+            <span
+                class="inline-flex size-5 items-center justify-center rounded-full bg-indigo-500/30 text-indigo-200">+</span>Agregar
+            bloque
+        </button>
+    </div>
+    <div class="space-y-3">
+        <article
+            class="flex flex-col gap-3 rounded-xl border border-white/10 bg-gray-950/60 p-4 md:flex-row md:items-center md:justify-between">
+            <div>
+                <h3 class="text-base font-semibold text-white">Calentamiento dinámico</h3>
+                <p class="text-sm text-gray-400">Movilidad articular y activación neuromuscular.</p>
+            </div>
+            <div class="flex items-center gap-4">
+                <span class="rounded-full bg-indigo-500/10 px-3 py-1 text-sm text-indigo-200">10 min</span>
+                <button type="button" class="text-sm text-gray-400 hover:text-indigo-200">Editar</button>
+            </div>
+        </article>
+        <article
+            class="flex flex-col gap-3 rounded-xl border border-white/10 bg-gray-950/60 p-4 md:flex-row md:items-center md:justify-between">
+            <div>
+                <h3 class="text-base font-semibold text-white">Bloque principal</h3>
+                <p class="text-sm text-gray-400">Circuito de fuerza alternado con ejercicios de estabilidad.</p>
+            </div>
+            <div class="flex items-center gap-4">
+                <span class="rounded-full bg-indigo-500/10 px-3 py-1 text-sm text-indigo-200">35 min</span>
+                <button type="button" class="text-sm text-gray-400 hover:text-indigo-200">Editar</button>
+            </div>
+        </article>
+        <article
+            class="flex flex-col gap-3 rounded-xl border border-white/10 bg-gray-950/60 p-4 md:flex-row md:items-center md:justify-between">
+            <div>
+                <h3 class="text-base font-semibold text-white">Vuelta a la calma</h3>
+                <p class="text-sm text-gray-400">Respiración guiada y estiramientos específicos.</p>
+            </div>
+            <div class="flex items-center gap-4">
+                <span class="rounded-full bg-indigo-500/10 px-3 py-1 text-sm text-indigo-200">15 min</span>
+                <button type="button" class="text-sm text-gray-400 hover:text-indigo-200">Editar</button>
+            </div>
+        </article>
+    </div>
+</div>
+
+<div class="flex flex-col gap-4 border-t border-white/10 pt-6 md:flex-row md:items-center md:justify-between">
+    <p class="text-sm text-gray-400">Puedes ajustar los bloques cuando tengas nuevas métricas o feedback de tus
+        deportistas.</p>
+    <div class="flex gap-3">
+        <button type="submit" name="saveAction" value="Draft"
+            class="rounded-lg border border-white/10 px-4 py-2 text-sm font-medium text-gray-300 hover:border-gray-400/40 hover:text-white">Guardar
+            borrador</button>
+        <button type="submit" name="saveAction" value="Publish"
+            class="rounded-lg bg-indigo-500 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-500/30 transition hover:bg-indigo-400">Generar
+            rutina</button>
+    </div>
+</div>
+
+<aside class="space-y-6 rounded-2xl border border-indigo-500/30 bg-indigo-500/10 p-6">
+    <h2 class="text-lg font-semibold text-indigo-100">Plantilla sugerida</h2>
+    <ul class="space-y-4 text-sm text-indigo-100/80">
+        <li class="flex items-start gap-3">
+            <span
+                class="mt-1 inline-flex size-5 items-center justify-center rounded-full bg-indigo-500/40 text-xs font-semibold text-white">1</span>
+            <p>Selecciona los días con mayor energía para ubicar el bloque principal.</p>
+        </li>
+        <li class="flex items-start gap-3">
+            <span
+                class="mt-1 inline-flex size-5 items-center justify-center rounded-full bg-indigo-500/40 text-xs font-semibold text-white">2</span>
+            <p>Alterna la intensidad entre sesiones para optimizar la recuperación muscular.</p>
+        </li>
+        <li class="flex items-start gap-3">
+            <span
+                class="mt-1 inline-flex size-5 items-center justify-center rounded-full bg-indigo-500/40 text-xs font-semibold text-white">3</span>
+            <p>Reserva al menos un bloque de movilidad o respiración consciente cada semana.</p>
+        </li>
+    </ul>
+    <div class="rounded-xl bg-indigo-500/20 p-4 text-sm text-indigo-100/90">
+        <p class="font-semibold text-indigo-100">Tip de progresión</p>
+        <p>Usa un ciclo de 4 semanas y aumenta el volumen del bloque principal en un 5&nbsp;% solo si el deportista
+            reporta RPE menor a 7.</p>
+    </div>
+</aside>
+</div>
 </section>
 
 @section Scripts {

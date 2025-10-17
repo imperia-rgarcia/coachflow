@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 
+using MyApp.Models;
+
 namespace MyApp.Data
 {
     public class ApplicationDbContext : DbContext
@@ -8,5 +10,7 @@ namespace MyApp.Data
             : base(options)
         {
         }
+
+        public DbSet<Routine> Routines { get; set; } = null!;
     }
 }
