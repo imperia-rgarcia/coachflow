@@ -1,0 +1,62 @@
+@model IEnumerable<MyApp.Models.RoutineListItemViewModel>
+@using System.Linq
+
+@{
+    ViewData["Title"] = "Rutinas";
+}
+
+<div class="px-4 sm:px-6 lg:px-8">
+    <div class="sm:flex sm:items-center">
+        <div class="sm:flex-auto">
+            <h1 class="text-base font-semibold text-white">Rutinas</h1>
+            <p class="mt-2 text-sm text-gray-300">Consulta todas las rutinas registradas, sus fases y los microciclos asociados.</p>
+        </div>
+        <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
+            <a asp-area="" asp-controller="Home" asp-action="RoutineCreator"
+                class="block rounded-md bg-indigo-500 px-3 py-2 text-center text-sm font-semibold text-white shadow-xs hover:bg-indigo-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">
+                Crear rutina
+            </a>
+        </div>
+    </div>
+    <div class="mt-8 flow-root">
+        <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+            <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+                <table class="relative min-w-full divide-y divide-white/15">
+                    <thead>
+                        <tr>
+                            <th scope="col" class="py-3.5 pr-3 pl-4 text-left text-sm font-semibold text-white sm:pl-0">Nombre</th>
+                            <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-white">Fases</th>
+                            <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-white">Días del microciclo</th>
+                            <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-white">Microciclos totales</th>
+                            <th scope="col" class="py-3.5 pr-4 pl-3 text-left text-sm font-semibold text-white sm:pr-0">Creada</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-white/10">
+                        @if (!Model.Any())
+                        {
+                            <tr>
+                                <td colspan="5" class="px-3 py-4 text-sm text-center text-gray-400">No hay rutinas registradas.</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            foreach (MyApp.Models.RoutineListItemViewModel routine in Model)
+                            {
+                                <tr>
+                                    <td class="py-4 pr-3 pl-4 text-sm font-medium whitespace-nowrap text-white sm:pl-0">@routine.Name</td>
+                                    <td class="px-3 py-4 text-sm whitespace-nowrap">
+                                        <span class="block text-white">@routine.PhaseCount @((routine.PhaseCount == 1) ? "fase" : "fases")</span>
+                                        <span class="block text-gray-400">@routine.PhasesSummary</span>
+                                    </td>
+                                    <td class="px-3 py-4 text-sm whitespace-nowrap text-gray-400">@routine.MicrocycleDaysSummary</td>
+                                    <td class="px-3 py-4 text-sm whitespace-nowrap text-gray-400">@routine.TotalMicrocycles</td>
+                                    <td class="py-4 pr-4 pl-3 text-sm whitespace-nowrap text-gray-400 sm:pr-0">@routine.CreatedAtUtc.ToLocalTime().ToString("g")</td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

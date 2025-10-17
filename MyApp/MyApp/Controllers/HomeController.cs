@@ -1,8 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using MyApp.Data;
 using MyApp.Models;
@@ -70,6 +73,63 @@ namespace MyApp.Controllers
             TempData["RoutineSaved"] = "Rutina guardada correctamente.";
 
             return RedirectToAction(nameof(RoutineCreator));
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> RoutineList()
+        {
+            List<Routine> routines = await _dbContext.Routines
+                .OrderByDescending(routine => routine.CreatedAtUtc)
+                .ToListAsync();
+
+            List<RoutineListItemViewModel> viewModel = new List<RoutineListItemViewModel>();
+
+            foreach (Routine routine in routines)
+            {
+                List<RoutinePhaseInputModel> defaultPhaseList = new List<RoutinePhaseInputModel>();
+                List<RoutinePhaseInputModel>? phases = JsonSerializer.Deserialize<List<RoutinePhaseInputModel>>(routine.PhasesJson);
+                List<RoutinePhaseInputModel> phaseList = phases ?? defaultPhaseList;
+
+                List<string> defaultMicrocycleDaysList = new List<string>();
+                List<string>? microcycleDays = JsonSerializer.Deserialize<List<string>>(routine.MicrocycleDaysJson);
+                List<string> microcycleDaysList = microcycleDays ?? defaultMicrocycleDaysList;
+
+                List<string> phaseSummaries = new List<string>();
+
+                foreach (RoutinePhaseInputModel phase in phaseList)
+                {
+                    string summary = string.Format("{0} ({1})", phase.Name, phase.Microcycles);
+                    phaseSummaries.Add(summary);
+                }
+
+                string phasesSummary = string.Join(", ", phaseSummaries);
+
+                if (string.IsNullOrEmpty(phasesSummary))
+                {
+                    phasesSummary = "Sin fases registradas";
+                }
+
+                string microcycleDaysSummary = string.Join(", ", microcycleDaysList);
+
+                if (string.IsNullOrEmpty(microcycleDaysSummary))
+                {
+                    microcycleDaysSummary = "Sin días registrados";
+                }
+
+                RoutineListItemViewModel listItem = new RoutineListItemViewModel
+                {
+                    Name = routine.Name,
+                    PhasesSummary = phasesSummary,
+                    MicrocycleDaysSummary = microcycleDaysSummary,
+                    TotalMicrocycles = routine.TotalMicrocycles,
+                    PhaseCount = phaseList.Count,
+                    CreatedAtUtc = routine.CreatedAtUtc
+                };
+
+                viewModel.Add(listItem);
+            }
+
+            return View(viewModel);
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
